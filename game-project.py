@@ -7,7 +7,8 @@ brilyante_stats = {
         "def": 10,
         "skill": "Fireball",
         "skill_damage": 30,
-        "skill_count": 3
+        "skill_count": 3,
+        "gold": 0
     },
 
     2: {
@@ -17,7 +18,8 @@ brilyante_stats = {
         "def": 12,
         "skill": "Tsunami",
         "skill_damage": 28,
-        "skill_count": 3
+        "skill_count": 3,
+        "gold": 0
     },
 
     3: {
@@ -27,7 +29,8 @@ brilyante_stats = {
         "def": 11,
         "skill": "Tornado",
         "skill_damage": 26,
-        "skill_count": 3
+        "skill_count": 3,
+        "gold": 0
     },
 
     4: {
@@ -37,7 +40,8 @@ brilyante_stats = {
         "def": 15,
         "skill": "Earthquake",
         "skill_damage": 22,
-        "skill_count": 3
+        "skill_count": 3,
+        "gold": 0
     }
 }
 
@@ -53,9 +57,13 @@ enemy_stats = {
 
     }
 }
+
+# sets
+menu = ["1. Continue", "2. Exit"]
+
 def intro():
     print("Welcome to the Encantadia! Traveler!")
-    choice = input("Ready for an adventure? (YES or NO)").upper()
+    choice = input("Ready for an adventure? (YES or NO) ").upper()
     gameIntro(choice)
 
 def createPlayer():
@@ -87,8 +95,9 @@ def createPlayer():
         print(f"Special Skill: {player['skill']}")
         print(f"Skill Damage: {player['skill_damage']}")
         print(f"Skill Count: {player['skill_count']}")
+        print(f"Gold: {player['gold']}")
     
-        start = input("Start your journey?").upper()
+        start = input("\nStart your journey? (YES or NO) ").upper()
         
         if start == "YES":
             dungeonTutorial(player)
@@ -118,44 +127,109 @@ def attack_system(attacker_atk, defender_defense, defender_hp):
 
     return new_hp, damage
 
+def displayPlayerStat(player):
+    print(f"\n===== YOUR STATS =====")
+    print(f"HP: {player['hp']}")
+    print(f"ATK: {player['atk']}")
+    print(f"Defense: {player['def']}")
+    print(f"Special Skill: {player['skill']}")
+    print(f"Skill Damage: {player['skill_damage']}")
+    print(f"Skill Count: {player['skill_count']}")
+    print(f"Gold: {player['gold']}")
+
+def displayMenu():
+    for menu_item in menu:
+        
+        print(menu_item)
 
 def dungeonTutorial(player):
     print("\n===== DUNGEON TUTORIAL =====")
 
     enemy = enemy_stats[1]
 
-    for enemy_id in enemy_stats:
+    print(f"\nA wild {enemy['name']} appeared!\n")
+    print(f"\nYour HP: {player['hp']}")
+    print(f"{enemy['name']} HP: {enemy['hp']}\n")
 
-        enemy = enemy_stats[1]
+    # TURN-BASED BATTLE
+    while player['hp'] > 0 and enemy['hp'] > 0:
 
-        print(f"\nA wild {enemy['name']} appeared!")
+        print("Tutorial: Pick a number to start your turn.")
+        print("\n===== YOUR TURN =====")
+        print("1. Basic Attack")
+        print("2. Special Skill")
 
-        # TURN-BASED BATTLE
-        while player["hp"] > 0 and enemy["hp"] > 0:
+        move = input("Choose attack: ")
 
-            print("\n===== YOUR TURN =====")
-            print("1. Basic Attack")
-            print("2. Special Skill")
+        if move == "1":
 
-            move = input("Choose attack: ")
+            enemy["hp"], damage = attack_system(player["atk"], enemy["def"], enemy["hp"])
 
-            if move == "1":
+            print(f"\nYou dealt {damage} damage!")
+            print(f"\n{enemy["name"]} health is now {enemy["hp"]}")
 
-                enemy["hp"], damage = attack_system(player["atk"], enemy["def"], enemy["hp"])
+        elif move == "2":
 
-                print(f"\nYou dealt {damage} damage!")
-                print(f"\nEnemy health is now {enemy["hp"]}")
+            enemy["hp"], damage = attack_system(player["skill_damage"], enemy["def"], enemy["hp"])
 
-            elif move == "2":
+            player["skill_count"]-= 1
 
-                enemy["hp"], damage = attack_system(player["skill_damage"], enemy["def"], enemy["hp"])
-
-                player["skill_count"]-= 1
-
-                print(f"\nYou dealt {damage} damage!")
+            print(f"\nYou dealt {damage} damage!")
+            if enemy['hp'] <= 0:
+                print(f"\nEnemy health is now 0")
+                print(f"Special Skill remaining: {player["skill_count"]}")
+            else: 
                 print(f"\nEnemy health is now {enemy["hp"]}")
                 print(f"Special Skill remaining: {player["skill_count"]}")
+
+        else:
+            print("Invalid move!")
+            continue
+
+        if enemy["hp"] <= 0:
+            print(f"\n{enemy['name']} was defeated!")
+            break
+
+        # ENEMY TURN
+        print(f"\n===== {enemy['name'].upper()} TURN =====")
+
+        player["hp"], enemy_damage = attack_system(enemy["atk"], player["def"], player["hp"])
+
+        print(f"{enemy["name"]} attacked!")
+
+        print(f"\n{enemy["name"]} dealt {enemy_damage} damage!")
+        print(f"Your health is now {player["hp"]}")
+
+        # SHOW HP
+        print(f"\nYour HP: {player['hp']}")
+        print(f"{enemy['name']} HP: {enemy['hp']}\n")
+
+    if player["hp"] <= 0:
+        print("\nGAME OVER!")
+        return
+        
+    print("\nCongratulations!")
+    print("You cleared the dungeon!")
+    print("You earned 150 Gold\n\n")
+    player['gold'] += 150
+
+    displayPlayerStat(player)
+
+    print("\nOnce you defeat a dungeon, you may proceed to Shop")
+    displayMenu()
+    choice = int(input("Choose Action: "))
+    
+    match choice:
+        case 1:
+            actualGame()
+        case 2:
+            choice = input("Are you quitting the game? (YES or NO) ").upper()
+            if choice == "NO":
+                actualGame()
             else:
-                print("finish na")
+                exit()
+                    
+def actualGame():
+    print("IT WORKEDDD!")
     
 intro()
