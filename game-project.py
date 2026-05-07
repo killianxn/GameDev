@@ -1,6 +1,7 @@
 #disctionaries
 brilyante_stats = {
     1: {
+        "plyr_name": "",
         "name": "Apoy",
         "hp": 30,
         "atk": 15,
@@ -12,6 +13,7 @@ brilyante_stats = {
     },
 
     2: {
+        "plyr_name": "",
         "name": "Tubig",
         "hp": 30,
         "atk": 14,
@@ -23,6 +25,7 @@ brilyante_stats = {
     },
 
     3: {
+        "plyr_name": "",
         "name": "Hangin",
         "hp": 30,
         "atk": 13,
@@ -34,6 +37,7 @@ brilyante_stats = {
     },
 
     4: {
+        "plyr_name": "",
         "name": "Lupa",
         "hp": 30,
         "atk": 11,
@@ -64,7 +68,12 @@ menu = ["1. Continue", "2. Exit"]
 def intro():
     print("Welcome to the Encantadia! Traveler!")
     choice = input("Ready for an adventure? (YES or NO) ").upper()
-    gameIntro(choice)
+
+    if choice == "YES":
+        player = createPlayer()
+        dungeonTutorial(player)
+    else:
+        print("You left the game!")
 
 def createPlayer():
 
@@ -81,9 +90,9 @@ def createPlayer():
     "Enter the number of your choice: "))
 
     if action in brilyante_stats:
-
         # Store chosen brilyante
-        player = brilyante_stats[action] #variable para sa dictionary
+        player = brilyante_stats[action].copy() #variable para sa dictionary
+        player["plyr_name"] = name
 
         print(f"\nWelcome, {name}!")
         print(f"You chose Brilyante ng {player['name']}")
@@ -100,18 +109,12 @@ def createPlayer():
         start = input("\nStart your journey? (YES or NO) ").upper()
         
         if start == "YES":
-            dungeonTutorial(player)
             return player
         else:
             intro()
     else:
         print("Not Applicable!")
 
-def gameIntro(choice):
-    if choice == "YES":
-        createPlayer()
-    else:
-        print("You left the game!")
 
 def attack_system(attacker_atk, defender_defense, defender_hp):
 
@@ -129,6 +132,8 @@ def attack_system(attacker_atk, defender_defense, defender_hp):
 
 def displayPlayerStat(player):
     print(f"\n===== YOUR STATS =====")
+    print(f"Name: {player['plyr_name']}")
+    print(f"Brilyante: {player['name']}")
     print(f"HP: {player['hp']}")
     print(f"ATK: {player['atk']}")
     print(f"Defense: {player['def']}")
@@ -163,7 +168,8 @@ def dungeonTutorial(player):
 
         if move == "1":
 
-            enemy["hp"], damage = attack_system(player["atk"], enemy["def"], enemy["hp"])
+            enemy['hp'], damage = attack_system(player['atk'], enemy['def'], enemy['hp'])
+            enemy['hp'] = max(0, enemy['hp'])
 
             print(f"\nYou dealt {damage} damage!")
             print(f"\n{enemy["name"]} health is now {enemy["hp"]}")
@@ -171,22 +177,19 @@ def dungeonTutorial(player):
         elif move == "2":
 
             enemy["hp"], damage = attack_system(player["skill_damage"], enemy["def"], enemy["hp"])
+            enemy["hp"] = max(0, enemy["hp"])
 
             player["skill_count"]-= 1
 
             print(f"\nYou dealt {damage} damage!")
-            if enemy['hp'] <= 0:
-                print(f"\nEnemy health is now 0")
-                print(f"Special Skill remaining: {player["skill_count"]}")
-            else: 
-                print(f"\nEnemy health is now {enemy["hp"]}")
-                print(f"Special Skill remaining: {player["skill_count"]}")
+            print(f"\nEnemy health is now {enemy["hp"]}")
+            print(f"Special Skill remaining: {player["skill_count"]}")
 
         else:
             print("Invalid move!")
             continue
 
-        if enemy["hp"] <= 0:
+        if enemy["hp"] == 0:
             print(f"\n{enemy['name']} was defeated!")
             break
 
@@ -209,27 +212,28 @@ def dungeonTutorial(player):
         return
         
     print("\nCongratulations!")
-    print("You cleared the dungeon!")
+    print("You cleared the tutorial!")
     print("You earned 150 Gold\n\n")
     player['gold'] += 150
 
     displayPlayerStat(player)
 
-    print("\nOnce you defeat a dungeon, you may proceed to Shop")
+    print("\nOnce you defeat a level, you may proceed to Shop")
     displayMenu()
     choice = int(input("Choose Action: "))
     
     match choice:
         case 1:
-            actualGame()
+            actualGame(player)
         case 2:
             choice = input("Are you quitting the game? (YES or NO) ").upper()
             if choice == "NO":
-                actualGame()
+                actualGame(player)
             else:
                 exit()
                     
-def actualGame():
-    print("IT WORKEDDD!")
+def actualGame(player):
+    # print("IT WORKEDDD!")
+    # displayPlayerStat(player)
     
 intro()
