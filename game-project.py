@@ -65,6 +65,7 @@ enemy_stats = {
 # sets
 menu = ["1. Continue", "2. Exit"]
 
+#Introduction of the game 
 def intro():
     print("Welcome to the Encantadia! Traveler!")
     choice = input("Ready for an adventure? (YES or NO) ").upper()
@@ -75,6 +76,7 @@ def intro():
     else:
         print("You left the game!")
 
+#Player information and stats
 def createPlayer():
 
     print("\n===========================================")
@@ -115,7 +117,7 @@ def createPlayer():
     else:
         print("Not Applicable!")
 
-
+# Battle System (Computation of damage and HP reduction)
 def attack_system(attacker_atk, defender_defense, defender_hp):
 
     # compute damage
@@ -130,6 +132,7 @@ def attack_system(attacker_atk, defender_defense, defender_hp):
 
     return new_hp, damage
 
+# Display player stats
 def displayPlayerStat(player):
     print(f"\n===== YOUR STATS =====")
     print(f"Name: {player['plyr_name']}")
@@ -142,11 +145,13 @@ def displayPlayerStat(player):
     print(f"Skill Count: {player['skill_count']}")
     print(f"Gold: {player['gold']}")
 
+# Display menu options
 def displayMenu():
     for menu_item in menu:
         
         print(menu_item)
 
+# Display shop options
 def dungeonTutorial(player):
     print("\n===== DUNGEON TUTORIAL =====")
 
@@ -210,7 +215,8 @@ def dungeonTutorial(player):
     if player["hp"] <= 0:
         print("\nGAME OVER!")
         return
-        
+    
+    # Reward after defeating the enemy
     print("\nCongratulations!")
     print("You cleared the tutorial!")
     print("You earned 150 Gold\n\n")
@@ -233,7 +239,7 @@ def dungeonTutorial(player):
                 exit()
                     
 def actualGame(player):
-    # print("IT WORKEDDD!")
+    print("IT WORKEDDD!")
     # displayPlayerStat(player)
     
 intro()
