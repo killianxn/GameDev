@@ -8,7 +8,6 @@ brilyante_stats = {
         "plyr_name": "",
         "name": "Apoy",
         "hp": 30,
-        "base_hp": 30,
         "max_hp": 30,
         "atk": 15,
         "def": 10,
@@ -17,11 +16,11 @@ brilyante_stats = {
         "skill_count": 3,
         "gold": 0,
     },
+
     2: {
         "plyr_name": "",
         "name": "Tubig",
         "hp": 30,
-        "base_hp": 30,
         "max_hp": 30,
         "atk": 14,
         "def": 12,
@@ -30,11 +29,11 @@ brilyante_stats = {
         "skill_count": 3,
         "gold": 0,
     },
+
     3: {
         "plyr_name": "",
         "name": "Hangin",
         "hp": 30,
-        "base_hp": 30,
         "max_hp": 30,
         "atk": 13,
         "def": 11,
@@ -43,11 +42,11 @@ brilyante_stats = {
         "skill_count": 3,
         "gold": 0,
     },
+
     4: {
         "plyr_name": "",
         "name": "Lupa",
         "hp": 30,
-        "base_hp": 30,
         "max_hp": 30,
         "atk": 11,
         "def": 15,
@@ -58,62 +57,115 @@ brilyante_stats = {
     },
 }
 
+
 # Enemy templates
 enemy_stats = {
-    1: {"name": "Banak and Nakba", "hp": 25, "atk": 18, "def": 11},
-    2: {"name": "Hatorian", "hp": 30, "atk": 20, "def": 13, "l_gold": 20, "w_gold": 120},
-    3: {"name": "Agane", "hp": 50, "atk": 30, "def": 18, "l_gold": 20, "w_gold": 170},
-    4: {"name": "Hagorn", "hp": 75, "atk": 50, "def": 25, "l_gold": 20, "w_gold": 200},
-    5: {"name": "Ether", "hp": 100, "atk": 70, "def": 30, "l_gold": 20, "w_gold": 300},
+    1: {"name": "Banak and Nakba", "hp": 25, "atk": 18, "def": 11, "gold": 150},
+    2: {"name": "Hatorian", "hp": 30, "atk": 20, "def": 13, "gold": 120},
+    3: {"name": "Agane", "hp": 50, "atk": 30, "def": 18, "gold": 170},
+    4: {"name": "Hagorn", "hp": 75, "atk": 50, "def": 25, "gold": 200},
+    5: {"name": "Ether", "hp": 100, "atk": 70, "def": 30, "gold": 300},
 }
+
 
 # Shop items
 shop_items = {
-    1: {"name": "Health Kit", "add": 10, "price": 55, "info": "..."},
-    2: {"name": "Attack Kit", "add": 25, "price": 80, "info": "..."},
-    3: {"name": "Skill Upgrade", "add": 35, "price": 100, "info": "..."},
-    4: {"name": "Defense Upgrade", "add": 25, "price": 80, "info": "..."},
+    1: {
+        "name": "Health Kit",
+        "stat": "max_hp",
+        "add": 10,
+        "price": 55,
+        "info": "Increase HP"
+    },
+
+    2: {
+        "name": "Attack Kit",
+        "stat": "atk",
+        "add": 25,
+        "price": 80,
+        "info": "Increase Attack"
+    },
+
+    3: {
+        "name": "Skill Upgrade",
+        "stat": "skill_damage",
+        "add": 35,
+        "price": 100,
+        "info": "Increase Skill Damage"
+    },
+
+    4: {
+        "name": "Defense Upgrade",
+        "stat": "def",
+        "add": 25,
+        "price": 80,
+        "info": "Increase Defense"
+    },
 }
 
-# Main menu
-menu = ["1. Continue", "2. Exit"]
 
-# Shop menu
-option = ["1. Buy", "2. Continue to next level"]
+# ==============================
+# MENUS (TUPLES)
+# ==============================
+
+main_menu = (
+    "1. Continue",
+    "2. Exit"
+)
+
+shop_menu = (
+    "1. Buy",
+    "2. Continue to next level"
+)
+
+battle_menu = (
+    "1. Basic Attack",
+    "2. Special Skill",
+    "3. Exit Battle"
+)
 
 
 # ==============================
-# UTILITY / CORE MECHANICS
+# UTILITY FUNCTIONS
 # ==============================
+
+def display_menu(menu):
+    """Display menu options."""
+    for item in menu:
+        print(item)
+
 
 def attack_system(attacker_atk, defender_def, defender_hp):
-    """Compute damage and apply it to defender_hp."""
+    """Compute damage."""
 
     damage = attacker_atk - defender_def
+
     if damage < 1:
         damage = 1
 
-    new_hp = defender_hp - damage
-    return new_hp, damage
+    defender_hp -= damage
+
+    return defender_hp, damage
 
 
-def displayMenu():
-    """Main menu after tutorial."""
-    for menu_item in menu:
-        print(menu_item)
+def deal_damage(attacker_power, defender_def, target):
+    """Apply damage to target."""
 
+    target["hp"], damage = attack_system(
+        attacker_power,
+        defender_def,
+        target["hp"]
+    )
 
-def displayOption():
-    """Shop options."""
-    print("==========================")
-    for option_item in option:
-        print(option_item)
+    target["hp"] = max(0, target["hp"])
+
+    return damage
 
 
 def displayPlayerStat(player):
-    """Print current player stats."""
+    """Display player statistics."""
+
     print(f"\n===== {player['plyr_name']} Statistics =====")
-    print(f"Name: {player['plyr_name']}")
     print(f"Brilyante: {player['name']}")
     print(f"HP: {player['hp']} / {player['max_hp']}")
     print(f"ATK: {player['atk']}")
@@ -124,69 +176,80 @@ def displayPlayerStat(player):
     print(f"Gold: {player['gold']}")
 
 
+def post_level_reward(player):
+    """Restore player after winning."""
+
+    print("\n===== LEVEL CLEARED =====")
+
+    player["skill_count"] = 3
+    player["hp"] = player["max_hp"]
+
+    print("Skill count restored!")
+    print(f"HP restored to {player['max_hp']}!")
+
+
 # ==============================
 # PLAYER SETUP
 # ==============================
 
 def createPlayer():
-    """Ask the user for name + brilyante selection and return a player dict."""
+    """Create player."""
 
-    print("\n===========================================")
+    print("\n===================================")
+
     name = input("What is your name? ").capitalize()
 
+    print("\nChoose your Brilyante:")
+
     while True:
-        print("Choose your Brilyante:")
-        action = int(
-            input(
+
+        try:
+            choice = int(input(
                 "1. Brilyante ng Apoy\n"
                 "2. Brilyante ng Tubig\n"
                 "3. Brilyante ng Hangin\n"
                 "4. Brilyante ng Lupa\n"
-                "Enter the number of your choice: "
-            )
-        )
+                "Enter choice: "
+            ))
 
-        if action in brilyante_stats:
-            break
-        else:
-            print("Invalid choice! Please pick a number from 1 to 4.\n")
+            if choice in brilyante_stats:
+                break
 
-    player = brilyante_stats[action].copy()
+            print("Invalid choice!")
+
+        except ValueError:
+            print("Enter numbers only!")
+
+    player = brilyante_stats[choice].copy()
+
     player["plyr_name"] = name
 
-    # baseline HP before any shop upgrades
-    player["base_hp"] = player["hp"]
-    player["max_hp"] = player["hp"]
-
-    print(f"\nWelcome, {player['plyr_name']}!")
+    print(f"\nWelcome, {name}!")
     print(f"You chose Brilyante ng {player['name']}")
 
-    print(f"\n===== {player['plyr_name']} Statistics =====")
-    print(f"HP: {player['hp']} / {player['max_hp']}")
-    print(f"ATK: {player['atk']}")
-    print(f"Defense: {player['def']}")
-    print(f"Special Skill: {player['skill']}")
-    print(f"Skill Damage: {player['skill_damage']}")
-    print(f"Skill Count: {player['skill_count']}")
-    print(f"Gold: {player['gold']}")
+    displayPlayerStat(player)
 
-    start = input("\nStart your journey? (YES or NO) ").upper()
-    if start == "YES":
-        return player
+    return player
 
-    intro()
-    return None
 
 def intro():
-    """Game intro entry point."""
-    print("Welcome to the Encantadia! Traveler!")
-    choice = input("Ready for an adventure? (YES or NO) ").upper()
+    """Game intro."""
 
-    if choice == "YES":
+    print("Welcome to Encantadia!")
+
+    start = input("Ready for adventure? (YES or NO): ").upper()
+
+    if start == "YES":
+
         player = createPlayer()
-        if player is None:
-            return
-        dungeonTutorial(player)
+
+        print("\n===== TUTORIAL =====")
+        print("Defeat enemies to earn gold.")
+        print("Use skills wisely.")
+        print("After every battle, you may visit the shop.\n")
+
+        startGame(player)
+
     else:
         print("You left the game!")
 
@@ -195,30 +258,26 @@ def intro():
 # SHOP SYSTEM
 # ==============================
 
-def add_hp(player, amount):
-    # Health Kit: increases BOTH current HP and max HP
-    player["max_hp"] += amount
-    player["hp"] = min(player["max_hp"], player["hp"] + amount)
-    print(f"\nHP increased by {amount}!")
+def upgrade_stat(player, stat, amount):
+    """Upgrade player stats."""
 
+    if stat == "max_hp":
 
-def add_attack(player, amount):
-    player["atk"] += amount
-    print(f"\nAttack increased by {amount}!")
+        player["max_hp"] += amount
 
+        player["hp"] = min(
+            player["max_hp"],
+            player["hp"] + amount
+        )
 
-def add_skill(player, amount):
-    player["skill_damage"] += amount
-    print(f"\nSkill Damage increased by {amount}!")
+    else:
+        player[stat] += amount
 
-
-def add_defense(player, amount):
-    player["def"] += amount
-    print(f"\nDefense increased by {amount}!")
+    print(f"{stat.upper()} increased by {amount}!")
 
 
 def buy_item(player, item_choice):
-    """Buy shop item and apply its stat changes."""
+    """Buy shop item."""
 
     if item_choice not in shop_items:
         print("Invalid Item!")
@@ -232,58 +291,58 @@ def buy_item(player, item_choice):
 
     player["gold"] -= item["price"]
 
-    if item_choice == 1:
-        add_hp(player, item["add"])
-    elif item_choice == 2:
-        add_attack(player, item["add"])
-    elif item_choice == 3:
-        add_skill(player, item["add"])
-    elif item_choice == 4:
-        add_defense(player, item["add"])
+    upgrade_stat(
+        player,
+        item["stat"],
+        item["add"]
+    )
 
     print(f"\nYou bought {item['name']}!")
     print(f"Remaining Gold: {player['gold']}")
 
 
 def shop(player):
-    """Loop shop until player continues to next level."""
-
-    print(f"\n{player['plyr_name']}'s Gold: {player['gold']}")
+    """Shop loop."""
 
     while True:
+
         print("\n===== IMAW'S SHOP =====")
+        print(f"Gold: {player['gold']}")
 
         for key, value in shop_items.items():
-            print(
-                f"""
-[{key}] {value['name']}
-    Effect : +{value['add']}
-    Price  : {value['price']} Gold
-    Info   : {value['info']}
-                """
-            )
 
-        displayOption()
+            print(f"""
+[{key}] {value['name']}
+Effect : +{value['add']}
+Price  : {value['price']} Gold
+Info   : {value['info']}
+            """)
+
+        display_menu(shop_menu)
+
         try:
-            pickedOption = int(input("Choose Action: "))
+            option = int(input("Choose Action: "))
+
         except ValueError:
-            print("Invalid Option!")
+            print("Invalid input!")
             continue
 
-        if pickedOption == 1:
+        if option == 1:
+
             try:
-                item_choice = int(input("\nEnter item number to buy: "))
+                item_choice = int(input("Enter item number: "))
+                buy_item(player, item_choice)
+
+                print("\n===== UPDATED STATS =====")
+                displayPlayerStat(player)
+
             except ValueError:
-                print("Invalid item choice!")
-                continue
+                print("Invalid item!")
 
-            buy_item(player, item_choice)
-            print("\n===== UPDATED STATS =====")
-            displayPlayerStat(player)
-
-        elif pickedOption == 2:
+        elif option == 2:
             print("\nProceeding to next level...")
             return
+
         else:
             print("Invalid Option!")
 
@@ -292,174 +351,206 @@ def shop(player):
 # BATTLE SYSTEM
 # ==============================
 
-def post_level_reward(player):
-    """Reward after clearing a level/boss."""
+def player_turn(player, enemy):
+    """Handle player attack turn."""
 
-    print("\n===== LEVEL CLEARED =====")
+    print(f"\n===== {player['plyr_name'].upper()} TURN =====")
 
-    player["skill_count"] = 3
-    print("Skill count restored!")
-
-    player["hp"] = player["max_hp"]
-
-    print(f"HP restored to max HP cap: {player['max_hp']}!")
-    print(f"Current HP: {player['hp']}")
-
-
-def dungeonTutorial(player):
-    """Tutorial battle (level 1), then continues to shop + startGame."""
-
-    print("\n===== DUNGEON TUTORIAL =====")
-    enemy = enemy_stats[1].copy()
-
-    print(f"\nA wild {enemy['name']} appeared!\n")
     print(f"Your HP: {player['hp']} / {player['max_hp']}")
-    print(f"{enemy['name']} HP: {enemy['hp']}\n")
+    print(f"{enemy['name']} HP: {enemy['hp']}")
 
-    while player["hp"] > 0 and enemy["hp"] > 0:
-        print("Tutorial: Pick a number to start your turn.")
-        print("\n===== YOUR TURN =====")
-        print("1. Basic Attack")
-        print("2. Special Skill")
-        print("3. Exit battle")
+    display_menu(battle_menu)
 
-        move = input("Choose attack: ")
+    move = input("Choose attack: ")
 
-        if move == "3":
-            print("\nYou exited the battle!\n")
-            return
+    # BASIC ATTACK
+    if move == "1":
 
-        if move == "1":
-            enemy["hp"], damage = attack_system(player["atk"], enemy["def"], enemy["hp"])
-            enemy["hp"] = max(0, enemy["hp"])
-            print(f"\nYou dealt {damage} damage!")
-            print(f"{enemy['name']} health is now {enemy['hp']}")
+        damage = deal_damage(
+            player["atk"],
+            enemy["def"],
+            enemy
+        )
 
-        elif move == "2":
-            enemy["hp"], damage = attack_system(player["skill_damage"], enemy["def"], enemy["hp"])
-            enemy["hp"] = max(0, enemy["hp"])
-            player["skill_count"] -= 1
-            print(f"\nYou dealt {damage} damage!")
-            print(f"Enemy health is now {enemy['hp']}")
-            print(f"Special Skill remaining: {player['skill_count']}")
-        else:
-            print("Invalid move!")
-            continue
+        print(f"\nYou dealt {damage} damage!")
+        print(f"{enemy['name']} HP is now {enemy['hp']}")
 
-        if enemy["hp"] == 0:
-            print(f"\n{enemy['name']} was defeated!")
-            post_level_reward(player)
-            break
+    # SKILL ATTACK
+    elif move == "2":
 
-        # ENEMY TURN
-        print(f"\n===== {enemy['name'].upper()} TURN =====")
-        player["hp"], enemy_damage = attack_system(enemy["atk"], player["def"], player["hp"])
-        player["hp"] = max(0, player["hp"])
+        if player["skill_count"] <= 0:
+            print("\nNo skills remaining!")
+            return True
 
-        print(f"\n{enemy['name']} attacked!")
-        print(f"{enemy['name']} dealt {enemy_damage} damage!")
-        print(f"Your health is now {player['hp']}")
-        print(f"\nYour HP: {player['hp']} / {player['max_hp']}")
-        print(f"{enemy['name']} HP: {enemy['hp']}\n")
+        damage = deal_damage(
+            player["skill_damage"],
+            enemy["def"],
+            enemy
+        )
 
-    if player["hp"] <= 0:
-        print("\nGAME OVER!")
-        return
+        player["skill_count"] -= 1
 
-    print("\nCongratulations!")
-    print("You cleared the tutorial!")
-    print("You earned 150 Gold\n\n")
-    player["gold"] += 150
+        print(f"\nYou used {player['skill']}!")
+        print(f"You dealt {damage} damage!")
+        print(f"Skill uses left: {player['skill_count']}")
 
-    displayPlayerStat(player)
+    # EXIT
+    elif move == "3":
+        print("\nYou exited the battle!")
+        return False
 
-    print("\nOnce you defeat a level, you may proceed to Shop")
-    displayMenu()
-    choice = int(input("Choose Action: "))
-
-    if choice == 1:
-        shop(player)
-        startGame(player)
-    elif choice == 2:
-        exit()
     else:
-        print("Invalid Input!")
+        print("Invalid move!")
+
+    return True
+
+
+def enemy_turn(player, enemy):
+    """Handle enemy attack."""
+
+    print(f"\n===== {enemy['name'].upper()} TURN =====")
+
+    damage = deal_damage(
+        enemy["atk"],
+        player["def"],
+        player
+    )
+
+    print(f"{enemy['name']} attacked!")
+    print(f"{enemy['name']} dealt {damage} damage!")
+
+    print(f"Your HP is now {player['hp']} / {player['max_hp']}")
 
 
 def startGame(player):
-    """Main game loop: fights enemies 2 to 5."""
+    """Main game loop."""
 
-    for enemy_id in range(2, 6):
+    for enemy_id in enemy_stats:
+
         enemy = enemy_stats[enemy_id].copy()
 
         print("\n===================================")
         print(f"\nA wild {enemy['name']} appeared!")
 
+        # Tutorial message only for first enemy
+        if enemy_id == 1:
+            print("\n[Tutorial Enemy]")
+            print("Choose attacks using numbers.")
+
         while player["hp"] > 0 and enemy["hp"] > 0:
-            print(f"\n===== {player['plyr_name'].upper()} TURN =====")
-            print(f"Your HP: {player['hp']} / {player['max_hp']}")
-            print(f"{enemy['name']} HP: {enemy['hp']}")
 
-            print("\n1. Basic Attack")
-            print("2. Special Skill")
-            print("3. Exit battle")
+            continue_battle = player_turn(player, enemy)
 
-            move = input("Choose attack: ")
-
-            if move == "3":
-                print("\nYou exited the battle!\n")
+            if continue_battle is False:
                 return
 
-            if move == "1":
-                enemy["hp"], damage = attack_system(player["atk"], enemy["def"], enemy["hp"])
-                enemy["hp"] = max(0, enemy["hp"])
-                print(f"\nYou dealt {damage} damage!")
-                print(f"{enemy['name']} HP is now {enemy['hp']}")
+            # Enemy defeated
+            if enemy["hp"] <= 0:
 
-            elif move == "2":
-                if player["skill_count"] <= 0:
-                    print("\nNo skills remaining!")
-                    continue
-
-                enemy["hp"], damage = attack_system(player["skill_damage"], enemy["def"], enemy["hp"])
-                enemy["hp"] = max(0, enemy["hp"])
-                player["skill_count"] -= 1
-
-                print(f"\nYou used {player['skill']}!")
-                print(f"You dealt {damage} damage!")
-                print(f"{enemy['name']} HP is now {enemy['hp']}")
-                print(f"Skill uses left: {player['skill_count']}")
-            else:
-                print("\nInvalid move!")
-                continue
-
-            if enemy["hp"] == 0:
                 print(f"\n{enemy['name']} was defeated!")
-                player["gold"] += enemy["w_gold"]
-                print(f"You earned {enemy['w_gold']} Gold!")
+
+                # gold reward
+                player["gold"] += enemy["gold"]
+
+                print(f"You earned {enemy['gold']} Gold!")
+
+                # skill damage buff
+                player["skill_damage"] += 8
+
+                print("Your special skill became stronger!")
+                print(f"Skill Damage increased by 8!")
+                print(f"Current Skill Damage: {player['skill_damage']}")
 
                 post_level_reward(player)
+
                 displayPlayerStat(player)
 
-                shop(player)
+                # Last enemy
+                if enemy_id == 5:
+                    print("\n===================================")
+                    print("CONGRATULATIONS!")
+                    print("You defeated all enemies!")
+                    return
+
+                display_menu(main_menu)
+
+                try:
+                    choice = int(input("Choose Action: "))
+
+                    if choice == 1:
+                        shop(player)
+
+                    elif choice == 2:
+                        print("Thanks for playing!")
+                        return
+
+                except ValueError:
+                    print("Invalid input!")
+
                 break
 
-            # ENEMY TURN
-            print(f"\n===== {enemy['name'].upper()} TURN =====")
-            player["hp"], enemy_damage = attack_system(enemy["atk"], player["def"], player["hp"])
-            player["hp"] = max(0, player["hp"])
+            # Enemy attacks
+            enemy_turn(player, enemy)
 
-            print(f"\n{enemy['name']} attacked!")
-            print(f"{enemy['name']} dealt {enemy_damage} damage!")
-            print(f"Your HP is now {player['hp']} / {player['max_hp']}")
+            # Game over
+            # if player["hp"] <= 0:
+            #     print("\nYou were defeated!")
 
-        if player["hp"] <= 0:
-            print("\nGAME OVER!")
-            return
+            # # consolation gold
+            # player["gold"] += 20
 
-    print("\n===================================")
-    print("CONGRATULATIONS!")
-    print("You defeated all enemies!")
+            # print("You received 20 Gold.")
+            # print(f"Current Gold: {player['gold']}")
+
+            # # restore player
+            # player["hp"] = player["max_hp"]
+            # player["skill_count"] = 3
+
+            # print("\nYou were brought back to the shop.")
+
+            # # go back to shop
+            # shop(player)
+
+            # # retry same enemy
+            # enemy = enemy_stats[enemy_id].copy()
+
+            # print(f"\nYou are challenging {enemy['name']} again!")
+
+            # Game over
+            if player["hp"] <= 0:
+
+                print(f"\nYou were defeated by {enemy['name']}!")
+
+                # Restore player
+                player["hp"] = player["max_hp"]
+                player["skill_count"] = 3
+
+                # TUTORIAL ENEMY
+                if enemy_id == 1:
+
+                    print("\nRetrying tutorial battle...")
+
+                    # restart same tutorial enemy
+                    enemy = enemy_stats[enemy_id].copy()
+
+                # NORMAL ENEMIES
+                else:
+
+                    # consolation gold
+                    player["gold"] += 20
+
+                    print("You received 20 Gold.")
+                    print(f"Current Gold: {player['gold']}")
+
+                    print("\nYou were brought back to the shop.")
+
+                    # open shop
+                    shop(player)
+
+                    # retry same enemy
+                    enemy = enemy_stats[enemy_id].copy()
+
+                    print(f"\nYou are challenging {enemy['name']} again!")
 
 
 # ==============================
